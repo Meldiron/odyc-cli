@@ -28,14 +28,6 @@ A powerful CLI tool with handy commands for Odyc.js developers. Generate code fr
 
 ### Installation
 
-#### From Source
-
-```bash
-git clone https://github.com/meldiron/odyc-cli.git
-cd odyc-cli
-go build -o odyc .
-```
-
 #### Using Go Install
 
 ```bash
