@@ -172,7 +172,7 @@ var spritesCmd = &cobra.Command{
 						} else {
 							color := colors[hexCodeRGBA]
 							color.Count++
-	
+
 							// check if file already present
 							filePresent := false
 							for _, file := range color.Files {
@@ -181,16 +181,15 @@ var spritesCmd = &cobra.Command{
 									break
 								}
 							}
-	
+
 							if !filePresent {
 								color.Files = append(colors[hexCodeRGBA].Files, png)
 							}
-	
+
 							colors[hexCodeRGBA] = color
 						}
 					}
-					
-					
+
 					colorIndexOfPixel := "."
 					if hexCodeRGBA != "#00000000" {
 						if colors[hexCodeRGBA].Index < 10 {
@@ -198,15 +197,15 @@ var spritesCmd = &cobra.Command{
 						} else {
 							newIndex := colors[hexCodeRGBA].Index - 10
 							charsMap := strings.Split("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ", "")
-							
-							if newIndex - 1 > len(charsMap) {
+
+							if newIndex-1 > len(charsMap) {
 								log.Error("Too many colors. You can only use up to 62 colors")
 							}
-							
+
 							colorIndexOfPixel = charsMap[newIndex]
 						}
 					}
-					
+
 					spriteRow[columnI] = colorIndexOfPixel
 					columnI++
 				}
@@ -233,7 +232,7 @@ var spritesCmd = &cobra.Command{
 			}
 			log.Debug(color.Color + " found " + strconv.Itoa(color.Count) + " times in " + strconv.Itoa(len(color.Files)) + " " + word)
 		}
-		
+
 		log.Info(strconv.Itoa(len(colors)) + " colors found across all sprites")
 		log.Info(strconv.Itoa(len(sprites)) + " sprites found across all PNG files")
 

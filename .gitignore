@@ -1,5 +1,6 @@
 # Odyc CLI specific
 tmp/
+odyc
 
 # Binaries for programs and plugins
 *.exe

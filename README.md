@@ -183,6 +183,9 @@ go run . sprites --assets ./test-sprites --output ./test-output.js
 ### Running Tests
 
 ```bash
+# Build binary
+go build -o odyc .
+
 # Run all tests
 go test ./...
 
