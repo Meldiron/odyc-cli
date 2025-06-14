@@ -1,4 +1,4 @@
-package main
+package cmd
 
 import (
 	"io"
@@ -9,9 +9,9 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func EnsureBinary(t *testing.T) {
-	_, err := os.Stat("odyc")
-	assert.Nil(t, err, "Binary file missing. Run 'go build -o odyc .'")
+func EnsureFile(t *testing.T, path string) {
+	_, err := os.Stat(path)
+	assert.Nil(t, err, "File missing: "+path)
 }
 
 type CommandResult struct {
@@ -44,10 +44,7 @@ func ExecuteCommand(t *testing.T, command string) CommandResult {
 	stdErr := string(stderrBytes)
 	stdOut := string(stdoutBytes)
 
-	exitCode := 0
-	if exitError, ok := err.(*exec.ExitError); ok {
-		exitCode = exitError.ExitCode()
-	}
+	exitCode := cmd.ProcessState.ExitCode()
 
 	return CommandResult{
 		ExitCode: exitCode,
