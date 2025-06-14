@@ -8,7 +8,7 @@
 
 A powerful CLI tool with handy commands for Odyc.js developers. Generate code from sprites and perform various development tasks to make your life with Odyc.js easier.
 
-![Cover](“docs/cover.png”)
+![Cover](docs/cover.png)
 
 ## ✨ Features
 
