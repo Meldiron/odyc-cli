@@ -2,6 +2,7 @@
 
 [![Go Format Check](https://github.com/meldiron/odyc-cli/actions/workflows/formatter.yml/badge.svg)](https://github.com/meldiron/odyc-cli/actions/workflows/formatter.yml)
 [![Go Lint Check](https://github.com/meldiron/odyc-cli/actions/workflows/linter.yml/badge.svg)](https://github.com/meldiron/odyc-cli/actions/workflows/linter.yml)
+[![Go Tests](https://github.com/meldiron/odyc-cli/actions/workflows/tests.yml/badge.svg)](https://github.com/meldiron/odyc-cli/actions/workflows/tests.yml)
 [![Go Version](https://img.shields.io/github/go-mod/go-version/meldiron/odyc-cli)](https://golang.org/doc/go1.24)
 [![License](https://img.shields.io/github/license/meldiron/odyc-cli)](LICENSE)
 
@@ -42,15 +43,9 @@ go install github.com/meldiron/odyc-cli@latest
 ### Basic Usage
 
 ```bash
-# Generate sprite configuration from PNG files
-odyc sprites --assets ./sprites --output ./config.js
-
-# Force overwrite existing output file
-odyc sprites --assets ./sprites --output ./config.js --force
-
 # Show help
+odyc
 odyc --help
-odyc sprites --help
 ```
 
 ## 📋 Commands
@@ -77,8 +72,8 @@ odyc sprites --assets ./game-sprites --output ./src/gameConfig.js --force
 **Generated Output:**
 ```javascript
 var gameConfig = {
-    cellWidth: 32,
-    cellHeight: 32,
+    cellWidth: 6,
+    cellHeight: 5,
     colors: [
         "#ff0000ff",
         "#00ff00ff",
@@ -109,20 +104,9 @@ var gameConfig = {
 
 ```
 odyc-cli/
-├── cmd/                    # Command implementations
-│   ├── root.go            # Root command and CLI setup
-│   └── sprites.go         # Sprites command implementation
-├── .github/               # GitHub Actions workflows
-│   └── workflows/
-│       ├── formatter.yml  # Go format checking
-│       └── linter.yml     # Go linting with golangci-lint
-├── tmp/                   # Temporary files (ignored)
-├── main.go               # Application entry point
-├── go.mod                # Go module definition
-├── go.sum                # Go module checksums
-├── format.sh             # Local formatting script
-├── lint.sh               # Local linting script
-└── README.md             # This documentation
+├── cmd/                  # Commands implementation
+├── .github/              # GitHub Actions workflows
+└── main.go               # Application entrypoint
 ```
 
 ### Architecture Overview
@@ -132,9 +116,7 @@ The CLI is built using the [Cobra](https://github.com/spf13/cobra) framework for
 **Core Components:**
 - **Main Entry Point** (`main.go`): Sets up logging styles and executes commands
 - **Root Command** (`cmd/root.go`): Defines the base CLI structure and help information  
-- **Sprites Command** (`cmd/sprites.go`): Handles PNG sprite processing and JavaScript generation
-- **Image Processing**: Uses Go's standard `image` package for PNG decoding and pixel analysis
-- **Color Management**: Intelligent color palette extraction with efficient indexing system
+- **Commands** (`cmd/*.go`): All available commands
 
 ## 🛠️ Development
 
@@ -157,28 +139,11 @@ The CLI is built using the [Cobra](https://github.com/spf13/cobra) framework for
    go mod download
    ```
 
-3. **Build and Test**
+3. **Build and Run**
    ```bash
    go build -o odyc .
    ./odyc --help
    ```
-
-### Running Locally
-
-#### Development Build
-```bash
-# Build the binary
-go build -o odyc .
-
-# Run with your changes
-./odyc sprites --assets ./test-sprites --output ./test-output.js
-```
-
-#### Direct Execution
-```bash
-# Run without building binary
-go run . sprites --assets ./test-sprites --output ./test-output.js
-```
 
 ### Running Tests
 
@@ -188,12 +153,6 @@ go build -o odyc .
 
 # Run all tests
 go test ./...
-
-# Run tests with verbose output
-go test -v ./...
-
-# Run tests with coverage
-go test -cover ./...
 ```
 
 ### Code Formatting
@@ -203,15 +162,9 @@ We use `go fmt` to ensure consistent code formatting.
 ```bash
 # Format all Go files
 go fmt ./...
-
-# Or use the provided script
-./format.sh
 ```
 
-**Automated Formatting Check:**
-The GitHub Actions workflow automatically checks if all files are properly formatted on every push and pull request.
-
-### Linting
+### Code Linter
 
 We use `golangci-lint` for comprehensive code linting.
 
@@ -221,13 +174,7 @@ go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
 
 # Run linter
 golangci-lint run
-
-# Or use the provided script
-./lint.sh
 ```
-
-**Automated Linting:**
-The GitHub Actions workflow automatically runs `golangci-lint` on every push and pull request to ensure code quality.
 
 ### Continuous Integration
 
