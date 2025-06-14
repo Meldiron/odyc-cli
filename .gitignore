@@ -1,0 +1,34 @@
+# Odyc CLI specific
+tmp/
+
+# Binaries for programs and plugins
+*.exe
+*.dll
+*.so
+*.dylib
+*.wasm
+
+# Test binaries
+*_test
+
+# Output of the go build command
+/dist/
+/bin/
+
+# Dependencies
+/vendor/
+
+# Go workspace file
+go.work
+
+# Logs and temporary files
+*.log
+*.tmp
+
+# Editor directories
+.vscode/
+.idea/
+
+# OS generated files
+.DS_Store
+Thumbs.db
