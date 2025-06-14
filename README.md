@@ -8,6 +8,8 @@
 
 A powerful CLI tool with handy commands for Odyc.js developers. Generate code from sprites and perform various development tasks to make your life with Odyc.js easier.
 
+![Cover](“docs/cover.png”)
+
 ## ✨ Features
 
 - **Sprite Code Generation**: Convert PNG sprite images into JavaScript configuration files
