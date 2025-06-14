@@ -40,19 +40,19 @@ var spritesCmd = &cobra.Command{
 	Long:  `Output JavaScript file containing definitions for colors and sprites based on multiple images in assets directory.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if _, err := os.Stat(filepath.Dir(outputPath)); err != nil {
-			log.Error("Directory of output path does not exist.")
+			log.Error("Directory of output path does not exist")
 			return
 		}
 
 		if _, err := os.Stat(outputPath); err == nil {
 			if !force {
-				log.Warn("Output file already exists. Please remove it first, or add --force flag to overwrite it.")
+				log.Warn("Output file already exists. Please remove it first, or add --force flag to overwrite it")
 				return
 			}
 		}
 
 		if _, err := os.Stat(assetsPath); err != nil {
-			log.Error("Assets directory does not exist.")
+			log.Error("Assets directory does not exist")
 			return
 		}
 
@@ -79,7 +79,7 @@ var spritesCmd = &cobra.Command{
 		}
 
 		if len(pngs) == 0 {
-			log.Error("No PNG files found in assets directory.")
+			log.Error("No PNG files found in assets directory")
 			return
 		}
 
@@ -125,7 +125,7 @@ var spritesCmd = &cobra.Command{
 
 			if bounds.Dx() > maxWidth {
 				if maxWidth != 0 && !warnedAboutWidth {
-					log.Warn("Images have different widths, which usually indicate a sprite sheet problem.")
+					log.Warn("Images have different widths, which usually indicate a sprite sheet problem")
 					warnedAboutWidth = true
 				}
 				maxWidth = bounds.Dx()
@@ -133,7 +133,7 @@ var spritesCmd = &cobra.Command{
 
 			if bounds.Dy() > maxHeight {
 				if maxHeight != 0 && !warnedAboutHeight {
-					log.Warn("Images have different heights, which usually indicate a sprite sheet problem.")
+					log.Warn("Images have different heights, which usually indicate a sprite sheet problem")
 					warnedAboutHeight = true
 				}
 
@@ -216,12 +216,12 @@ var spritesCmd = &cobra.Command{
 		}
 
 		if len(colors) == 0 {
-			log.Error("No colors found in PNG images.")
+			log.Error("No colors found in PNG images")
 			return
 		}
 
 		if len(sprites) == 0 {
-			log.Error("No sprites made from PNG images.")
+			log.Error("No sprites made from PNG images")
 			return
 		}
 
@@ -282,6 +282,6 @@ var spritesCmd = &cobra.Command{
 			}
 		}
 
-		log.Logf(2, "Sprites configuration generated successfully.")
+		log.Logf(2, "Sprites configuration generated successfully")
 	},
 }

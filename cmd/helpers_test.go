@@ -16,8 +16,7 @@ func EnsureFile(t *testing.T, path string) {
 
 type CommandResult struct {
 	ExitCode int
-	Stdout   string
-	Stderr   string
+	Output   string
 }
 
 func ExecuteCommand(t *testing.T, command string) CommandResult {
@@ -39,16 +38,26 @@ func ExecuteCommand(t *testing.T, command string) CommandResult {
 	assert.Nil(t, err, "Failed to read CLI stderr")
 
 	err = cmd.Wait()
-	assert.Nil(t, err, "Failed to wait for command to finish")
+
+	exitCode := 0
+
+	if err != nil {
+		handled := false
+		if exitErr, ok := err.(*exec.ExitError); ok {
+			handled = true
+			exitCode = exitErr.ExitCode()
+		}
+
+		if !handled {
+			assert.Nil(t, err, "Unexpected CLI error: "+err.Error())
+		}
+	}
 
 	stdErr := string(stderrBytes)
 	stdOut := string(stdoutBytes)
 
-	exitCode := cmd.ProcessState.ExitCode()
-
 	return CommandResult{
 		ExitCode: exitCode,
-		Stdout:   stdOut,
-		Stderr:   stdErr,
+		Output:   stdOut + stdErr,
 	}
 }

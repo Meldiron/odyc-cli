@@ -1,6 +1,7 @@
 # Odyc CLI specific
 tmp/
 odyc
+tests/resources/sprites.js
 
 # Binaries for programs and plugins
 *.exe
