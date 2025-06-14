@@ -203,8 +203,12 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🙏 Acknowledgments
 
+### Core Dependencies
+- [Go](https://golang.org/) - The programming language used to build CLI tool
 - [Cobra](https://github.com/spf13/cobra) - Powerful CLI framework for Go
-- [Charm](https://charm.sh/) - Beautiful terminal applications and logging
+- [Charmbracelet Log](https://github.com/charmbracelet/log) - Beautiful structured logging
+- [Charmbracelet Lipgloss](https://github.com/charmbracelet/lipgloss) - Style definitions for terminal UIs
+- [Testify](https://github.com/stretchr/testify) - Testing toolkit with assertions and mocks
 - [golangci-lint](https://golangci-lint.run/) - Comprehensive Go linter
 
 ## 📞 Support
