@@ -13,31 +13,31 @@ func TestSpritesCommand(t *testing.T) {
 	assert.Nil(t, err, "Failed to do cleanup before tests start")
 
 	// Preparation
-	EnsureFile(t, "../odyc")
+	EnsureFile(t, "../odyc-cli")
 	var response CommandResult
 
 	// Basic usage
-	response = ExecuteCommand(t, "../odyc sprites")
+	response = ExecuteCommand(t, "../odyc-cli sprites")
 	assert.Equal(t, response.ExitCode, 1)
 	assert.Contains(t, response.Output, "Usage:")
 	assert.Contains(t, response.Output, `required flag(s) "assets", "output" not set`)
 
 	// --help param
-	response = ExecuteCommand(t, "../odyc sprites --help")
+	response = ExecuteCommand(t, "../odyc-cli sprites --help")
 	assert.Equal(t, response.ExitCode, 0)
 	assert.Contains(t, response.Output, "Usage:")
 
 	// Some required params missing
-	response = ExecuteCommand(t, "../odyc sprites -a ../tests/resources/")
+	response = ExecuteCommand(t, "../odyc-cli sprites -a ../tests/resources/")
 	assert.Equal(t, response.ExitCode, 1)
 	assert.Contains(t, response.Output, `required flag(s) "output" not set`)
 
-	response = ExecuteCommand(t, "../odyc sprites -o ../tests/resources/sprites.js")
+	response = ExecuteCommand(t, "../odyc-cli sprites -o ../tests/resources/sprites.js")
 	assert.Equal(t, response.ExitCode, 1)
 	assert.Contains(t, response.Output, `required flag(s) "assets" not set`)
 
 	// Successful run
-	response = ExecuteCommand(t, "../odyc sprites -a ../tests/resources/ -o ../tests/resources/sprites.js")
+	response = ExecuteCommand(t, "../odyc-cli sprites -a ../tests/resources/ -o ../tests/resources/sprites.js")
 	assert.Equal(t, response.ExitCode, 0)
 	assert.Contains(t, response.Output, `9 colors found across all sprites`)
 	assert.Contains(t, response.Output, `2 sprites found across all PNG files`)
@@ -46,11 +46,11 @@ func TestSpritesCommand(t *testing.T) {
 	// TODO: Validate sprites.js
 
 	// --force param
-	response = ExecuteCommand(t, "../odyc sprites -a ../tests/resources/ -o ../tests/resources/sprites.js")
+	response = ExecuteCommand(t, "../odyc-cli sprites -a ../tests/resources/ -o ../tests/resources/sprites.js")
 	assert.Equal(t, response.ExitCode, 0)
 	assert.Contains(t, response.Output, `Output file already exists`)
 
-	response = ExecuteCommand(t, "../odyc sprites -a ../tests/resources/ -o ../tests/resources/sprites.js -f")
+	response = ExecuteCommand(t, "../odyc-cli sprites -a ../tests/resources/ -o ../tests/resources/sprites.js -f")
 	assert.Equal(t, response.ExitCode, 0)
 	assert.Contains(t, response.Output, `Sprites configuration generated successfully`)
 

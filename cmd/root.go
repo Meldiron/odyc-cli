@@ -9,7 +9,7 @@ import (
 )
 
 var rootCmd = &cobra.Command{
-	Use:   "odyc",
+	Use:   "odyc-cli",
 	Short: "CLI tool with handy commands for Odyc.js developers",
 	Long:  `Generate code from sprite, or do similar actions making your life with Odyc.js easier.`,
 	Run: func(cmd *cobra.Command, args []string) {

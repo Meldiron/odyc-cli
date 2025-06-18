@@ -38,8 +38,8 @@ go install github.com/meldiron/odyc-cli@latest
 
 ```bash
 # Show help
-odyc
-odyc --help
+odyc-cli
+odyc-cli --help
 ```
 
 ## 📋 Commands
@@ -49,7 +49,7 @@ odyc --help
 Generate JavaScript configuration from sprite PNG files.
 
 ```bash
-odyc sprites [OPTIONS]
+odyc-cli sprites [OPTIONS]
 ```
 
 **Options:**
@@ -60,7 +60,7 @@ odyc sprites [OPTIONS]
 
 **Example:**
 ```bash
-odyc sprites --assets ./game-sprites --output ./src/gameConfig.js --force
+odyc-cli sprites --assets ./game-sprites --output ./src/gameConfig.js --force
 ```
 
 **Generated Output:**
@@ -135,15 +135,15 @@ The CLI is built using the [Cobra](https://github.com/spf13/cobra) framework for
 
 3. **Build and Run**
    ```bash
-   go build -o odyc .
-   ./odyc --help
+   go build -o odyc-cli .
+   ./odyc-cli --help
    ```
 
 ### Running Tests
 
 ```bash
 # Build binary
-go build -o odyc .
+go build -o odyc-cli .
 
 # Run all tests
 go test ./...

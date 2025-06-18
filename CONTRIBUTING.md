@@ -30,8 +30,8 @@ Before you begin, ensure you have the following installed:
    ```
 5. **Build and test** the project:
    ```bash
-   go build -o odyc .
-   ./odyc --help
+   go build -o odyc-cli .
+   ./odyc-cli --help
    ```
 
 ## 🐛 Reporting Bugs
@@ -122,8 +122,8 @@ Any other relevant information.
    go test ./...
    
    # Build and test manually
-   go build -o odyc .
-   ./odyc sprites --assets ./test-assets --output ./test.js
+   go build -o odyc-cli .
+   ./odyc-cli sprites --assets ./test-assets --output ./test.js
    ```
 
 4. **Format and lint**:
