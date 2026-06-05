@@ -17,6 +17,7 @@ A powerful CLI tool with handy commands for Odyc.js developers. Generate code fr
 - **Multi-sprite Support**: Process multiple PNG files in a single command
 - **Smart Color Indexing**: Efficient color mapping with support for up to 62 unique colors
 - **Flexible Output**: Generate JavaScript configuration files with customizable paths
+- **Account Authentication**: Sign in securely from the terminal using the OAuth 2.1 device flow
 - **Developer-friendly**: Beautiful terminal output with colored logging and progress indicators
 
 ## 🚀 Quick Start
@@ -91,6 +92,39 @@ var gameConfig = {
     }
 };
 ```
+
+### `login`
+
+Sign in to your Odyc account using the OAuth 2.1 device authorization flow. The CLI prints a verification URL and a code (and tries to open your browser automatically); confirm the code in your browser to authenticate this device. Credentials are stored locally in your OS config directory (`auth.json`) with owner-only permissions.
+
+```bash
+odyc-cli login
+```
+
+**Options:**
+- `-h, --help` - Show help for login command
+
+### `whoami`
+
+Show the currently signed-in account by fetching details from the OAuth `/userinfo` endpoint. Expired sessions are refreshed automatically when possible.
+
+```bash
+odyc-cli whoami
+```
+
+**Options:**
+- `-h, --help` - Show help for whoami command
+
+### `logout`
+
+Sign out by revoking the current tokens at the authorization server (best effort) and removing the locally stored credentials.
+
+```bash
+odyc-cli logout
+```
+
+**Options:**
+- `-h, --help` - Show help for logout command
 
 ## 🏗️ Architecture
 
