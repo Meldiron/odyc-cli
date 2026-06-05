@@ -28,21 +28,28 @@ var logoutCmd = &cobra.Command{
 			return
 		}
 
-		// Best-effort revocation at the server; local cleanup happens regardless.
-		if cfg, cfgErr := fetchOIDCConfig(); cfgErr == nil && cfg.RevocationEndpoint != "" {
-			if tokens.RefreshToken != "" {
-				revokeToken(cfg, tokens.RefreshToken, "refresh_token")
-			}
-			revokeToken(cfg, tokens.AccessToken, "access_token")
-		}
-
-		if err := clearTokens(); err != nil {
+		cfg, _ := fetchOIDCConfig()
+		if err := signOut(cfg, tokens); err != nil {
 			log.Error("Failed to remove stored credentials: " + err.Error())
 			return
 		}
 
 		log.Logf(2, "Signed out successfully")
 	},
+}
+
+// signOut revokes the given tokens at the authorization server (best effort)
+// and removes the locally stored credentials. cfg may be nil, in which case
+// revocation is skipped and only local cleanup happens.
+func signOut(cfg *OIDCConfig, tokens *Tokens) error {
+	if cfg != nil && cfg.RevocationEndpoint != "" {
+		if tokens.RefreshToken != "" {
+			revokeToken(cfg, tokens.RefreshToken, "refresh_token")
+		}
+		revokeToken(cfg, tokens.AccessToken, "access_token")
+	}
+
+	return clearTokens()
 }
 
 // revokeToken makes a best-effort call to the revocation endpoint (RFC 7009).

@@ -45,10 +45,13 @@ var loginCmd = &cobra.Command{
 			return
 		}
 
-		// Already signed in?
-		if tokens, _ := loadTokens(); tokens != nil && tokens.AccessToken != "" && !tokens.Expired() {
-			log.Warn("You are already logged in. Run 'odyc-cli logout' first to sign in as someone else")
-			return
+		// Already signed in? Sign out the previous session automatically so the
+		// user can log in (or re-authorize) without a manual logout step.
+		if tokens, _ := loadTokens(); tokens != nil && tokens.AccessToken != "" {
+			log.Info("Signing out the previous session...")
+			if err := signOut(cfg, tokens); err != nil {
+				log.Debug("Failed to clear previous credentials: " + err.Error())
+			}
 		}
 
 		device, err := requestDeviceCode(cfg, loginGameID)
@@ -106,7 +109,7 @@ var loginCmd = &cobra.Command{
 					log.Error("Signed in, but failed to save credentials: " + err.Error())
 					return
 				}
-				log.Logf(2, "Signed in successfully! Run 'odyc-cli whoami' to see your account")
+				log.Logf(2, "Signed in successfully! Run 'odyc-cli create' to create your first game")
 				return
 			}
 		}
