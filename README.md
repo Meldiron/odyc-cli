@@ -18,6 +18,8 @@ A powerful CLI tool with handy commands for Odyc.js developers. Generate code fr
 - **Smart Color Indexing**: Efficient color mapping with support for up to 62 unique colors
 - **Flexible Output**: Generate JavaScript configuration files with customizable paths
 - **Account Authentication**: Sign in securely from the terminal using the OAuth 2.1 device flow
+- **Game Scaffolding**: Create a new Odyc game from a starter template with a single command
+- **One-command Deploy**: Publish your game to Odyc and get a shareable, playable URL
 - **Developer-friendly**: Beautiful terminal output with colored logging and progress indicators
 
 ## 🚀 Quick Start
@@ -93,15 +95,62 @@ var gameConfig = {
 };
 ```
 
-### `login`
+### `create`
 
-Sign in to your Odyc account using the OAuth 2.1 device authorization flow. The CLI prints a verification URL and a code (and tries to open your browser automatically); confirm the code in your browser to authenticate this device. Credentials are stored locally in your OS config directory (`auth.json`) with owner-only permissions.
+Create a new game on your Odyc account and scaffold a local folder for it. Prompts for a folder name (or accepts one as an argument), creates the game via the API (using the `games.create` scope), then writes a starter `game.js` (based on the default Odyc template) and an `odyc.json` linking the folder to the game. Requires you to be signed in (`odyc-cli login`).
+
+After creating, you need to authorize deploys for the new game by signing in again with its ID (see `login --game-id`).
 
 ```bash
-odyc-cli login
+odyc-cli create [folder]
+```
+
+**Example:**
+```bash
+odyc-cli create my-game
+cd my-game
+odyc-cli login --game-id="<id printed by create>"
+# edit game.js
+odyc-cli deploy
 ```
 
 **Options:**
+- `-h, --help` - Show help for create command
+
+### `deploy`
+
+Update the linked game's code with the `game.js` in the current folder. The game must already exist (`odyc-cli create`) and be recorded in `odyc.json`; this command only updates code, it does not create games. When finished, the CLI prints the playable URL.
+
+Code updates are authorized per game via an OAuth 2.1 Rich Authorization Request (`type: game`, `actions: [code.write]`, `identifier: <gameId>`) granted at sign-in — run `odyc-cli login --game-id="<id>"` first. If the grant is missing, deploy returns a `403` and reminds you how to authorize.
+
+```bash
+odyc-cli deploy
+```
+
+**`odyc.json`:**
+```json
+{
+  "gameId": "...",
+  "slug": "..."
+}
+```
+
+**Options:**
+- `-h, --help` - Show help for deploy command
+
+### `login`
+
+Sign in to your Odyc account using the OAuth 2.1 device authorization flow. The CLI prints a verification URL and a code, then waits while you authorize. Press ENTER to open the URL in your browser, or open it yourself — polling starts immediately either way. Credentials are stored locally in your OS config directory (`auth.json`) with owner-only permissions.
+
+Pass `--game-id` to additionally authorize code deploys for a specific game. This narrows the requested Rich Authorization Request to `type: game`, `actions: [code.write]`, `identifier: <gameId>`, which the deploy endpoint requires.
+
+```bash
+odyc-cli login
+odyc-cli login --game-id="<game id>"
+```
+
+**Options:**
+- `--game-id <id>` - Authorize code deploys for a specific game ID
 - `-h, --help` - Show help for login command
 
 ### `whoami`

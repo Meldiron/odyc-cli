@@ -1,17 +1,24 @@
 package cmd
 
 import (
+	"bufio"
 	"encoding/json"
 	"io"
 	"net/http"
 	"net/url"
+	"os"
 	"time"
 
 	"github.com/charmbracelet/log"
 	"github.com/spf13/cobra"
 )
 
+// loginGameID, when set via --game-id, narrows the requested code-write grant
+// to a single game so deploys to it can be authorized.
+var loginGameID string
+
 func init() {
+	loginCmd.Flags().StringVar(&loginGameID, "game-id", "", "authorize code deploys for a specific game ID")
 	rootCmd.AddCommand(loginCmd)
 }
 
@@ -44,7 +51,7 @@ var loginCmd = &cobra.Command{
 			return
 		}
 
-		device, err := requestDeviceCode(cfg)
+		device, err := requestDeviceCode(cfg, loginGameID)
 		if err != nil {
 			log.Error("Failed to start sign-in: " + err.Error())
 			return
@@ -59,32 +66,64 @@ var loginCmd = &cobra.Command{
 		log.Info(verificationURL)
 		log.Logf(3, "And confirm this code: %s", device.UserCode)
 
-		if err := openBrowser(verificationURL); err != nil {
-			log.Debug("Could not open browser automatically: " + err.Error())
+		// Start polling immediately, in the background: the developer may open
+		// the URL manually (or copy it elsewhere) before pressing ENTER, so we
+		// must be ready to receive the token regardless.
+		type pollResult struct {
+			tokens *Tokens
+			err    error
 		}
+		tokenCh := make(chan pollResult, 1)
+		go func() {
+			tokens, err := pollForToken(cfg, device)
+			tokenCh <- pollResult{tokens, err}
+		}()
 
-		log.Info("Waiting for you to authorize in the browser...")
+		// Wait for ENTER to open the browser, but don't block sign-in on it.
+		enterCh := make(chan struct{}, 1)
+		go func() {
+			reader := bufio.NewReader(os.Stdin)
+			_, _ = reader.ReadString('\n')
+			enterCh <- struct{}{}
+		}()
 
-		tokens, err := pollForToken(cfg, device)
-		if err != nil {
-			log.Error("Sign-in failed: " + err.Error())
-			return
+		log.Logf(3, "Press ENTER to open the URL in your browser, or open it yourself")
+		log.Info("Waiting for you to authorize...")
+
+		for {
+			select {
+			case <-enterCh:
+				if err := openBrowser(verificationURL); err != nil {
+					log.Debug("Could not open browser automatically: " + err.Error())
+				}
+				// Keep waiting for authorization.
+			case res := <-tokenCh:
+				if res.err != nil {
+					log.Error("Sign-in failed: " + res.err.Error())
+					return
+				}
+				if err := saveTokens(res.tokens); err != nil {
+					log.Error("Signed in, but failed to save credentials: " + err.Error())
+					return
+				}
+				log.Logf(2, "Signed in successfully! Run 'odyc-cli whoami' to see your account")
+				return
+			}
 		}
-
-		if err := saveTokens(tokens); err != nil {
-			log.Error("Signed in, but failed to save credentials: " + err.Error())
-			return
-		}
-
-		log.Logf(2, "Signed in successfully! Run 'odyc-cli whoami' to see your account")
 	},
 }
 
 // requestDeviceCode kicks off the device authorization flow.
-func requestDeviceCode(cfg *OIDCConfig) (*deviceAuthResponse, error) {
+func requestDeviceCode(cfg *OIDCConfig, gameID string) (*deviceAuthResponse, error) {
 	form := url.Values{}
 	form.Set("client_id", oauthClientID)
 	form.Set("scope", oauthScope)
+
+	// Only request a Rich Authorization Request when a specific game is being
+	// authorized; a plain sign-in sends no authorization_details at all.
+	if gameID != "" {
+		form.Set("authorization_details", authorizationDetails(gameID))
+	}
 
 	resp, err := http.PostForm(cfg.DeviceAuthorizationEndpoint, form)
 	if err != nil {

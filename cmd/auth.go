@@ -46,8 +46,34 @@ func errFromBody(status int, body []byte) error {
 const (
 	oauthIssuer   = "https://fra.cloud.appwrite.io/v1/oauth2/odyc-play"
 	oauthClientID = "6a231e92000c0ef54658"
-	oauthScope    = "openid profile email"
+	oauthScope    = "openid profile email games.create"
 )
+
+// authorizationDetails builds the RFC 9396 Rich Authorization Request (RAR) the
+// CLI asks for at sign-in: permission to write code to games. When gameID is
+// set, the grant is narrowed to that specific game — the Odyc code-update
+// endpoint authorizes per game by matching this detail's identifier (and type
+// and actions) against the access token.
+func authorizationDetails(gameID string) string {
+	detail := map[string]any{
+		"type":    "game",
+		"actions": []string{"code.write"},
+	}
+	if gameID != "" {
+		detail["identifier"] = gameID
+	}
+
+	data, err := json.Marshal([]map[string]any{detail})
+	if err != nil {
+		return `[{"type":"game","actions":["code.write"]}]`
+	}
+	return string(data)
+}
+
+// odycAPIBase is the base URL of the Odyc Play app, which hosts the public,
+// OAuth2-protected API used by the `create` and `deploy` commands, as well as
+// the playable game URLs.
+const odycAPIBase = "https://odyc.appwrite.network"
 
 // OIDCConfig holds the subset of the OpenID Connect discovery document we use.
 type OIDCConfig struct {
