@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en" style="background-color: #1a1c2c">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>My Odyc Game</title>
+
+		<!--
+			Odyc.js, loaded as a browser global from the CDN. This exposes a global
+			`odyc` object; we then copy its functions (createGame, …) onto `window`
+			so the game files can call `createGame(...)` directly — the same way the
+			code runs once deployed to Odyc, so a single set of files works in both
+			places. Pin the version to keep your game reproducible.
+		-->
+		<script src="https://www.unpkg.com/odyc@0.0.125/dist/index.global.js"></script>
+		<script>
+			Object.assign(window, odyc);
+		</script>
+
+		<!--
+			Your game, split across small files. Order matters: shared utils first,
+			then scenes, then the entry point last. When you add a new file, add a
+			matching <script> tag here — `odyc-cli deploy` bundles these same files
+			in this same order.
+		-->
+		<script src="utils/sprites.js"></script>
+		<script src="scenes/title.js"></script>
+		<script src="scenes/world.js"></script>
+		<script src="index.js"></script>
+	</head>
+	<body></body>
+</html>

@@ -97,7 +97,23 @@ var gameConfig = {
 
 ### `create`
 
-Create a new game on your Odyc account and scaffold a local folder for it. Prompts for a folder name (or accepts one as an argument), creates the game via the API (using the `games.create` scope), then writes a starter `game.js` (based on the default Odyc template) and an `odyc.json` linking the folder to the game. Requires you to be signed in (`odyc-cli login`).
+Create a new game on your Odyc account and scaffold a local folder for it. Prompts for a folder name (or accepts one as an argument), creates the game via the API (using the `games.create` scope), then scaffolds a starter project and an `odyc.json` linking the folder to the game. Requires you to be signed in (`odyc-cli login`).
+
+The scaffold is a small, modular game you can play immediately by opening `index.html` (it loads Odyc.js from a CDN) and grow from there:
+
+```
+my-game/
+├── index.html      # Loads Odyc + every game file, in order. Open this to play.
+├── index.js        # Entry point — starts the first scene.
+├── scenes/         # One file per scene (a screen / state of the game).
+│   ├── title.js
+│   └── world.js
+├── utils/          # Shared, reusable code (palette, sprites, helpers).
+│   └── sprites.js
+└── odyc.json       # Links this folder to your game on Odyc.
+```
+
+There is no build step: every `.js` file is loaded into one shared scope, so anything defined in one file is available in the others.
 
 After creating, you need to authorize deploys for the new game by signing in again with its ID (see `login --game-id`).
 
@@ -109,8 +125,9 @@ odyc-cli create [folder]
 ```bash
 odyc-cli create my-game
 cd my-game
+open index.html   # play locally
 odyc-cli login --game-id="<id printed by create>"
-# edit game.js
+# edit scenes/, utils/ and index.js
 odyc-cli deploy
 ```
 
@@ -119,7 +136,7 @@ odyc-cli deploy
 
 ### `deploy`
 
-Update the linked game's code with the `game.js` in the current folder. The game must already exist (`odyc-cli create`) and be recorded in `odyc.json`; this command only updates code, it does not create games. When finished, the CLI prints the playable URL.
+Bundle the current folder's game code into a single file and update the linked game with it. Files are concatenated in the same order `index.html` loads them — every `*.js` in `utils/`, then every `*.js` in `scenes/`, then `index.js` last — so the deployed bundle behaves exactly like the game does locally. (Legacy single-file projects with just a `game.js` are still deployed as-is.) The game must already exist (`odyc-cli create`) and be recorded in `odyc.json`; this command only updates code, it does not create games. When finished, the CLI prints the playable URL.
 
 Code updates are authorized per game via an OAuth 2.1 Rich Authorization Request (`type: game`, `actions: [code.write]`, `identifier: <gameId>`) granted at sign-in — run `odyc-cli login --game-id="<id>"` first. If the grant is missing, deploy returns a `403` and reminds you how to authorize.
 

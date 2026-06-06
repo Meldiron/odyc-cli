@@ -4,9 +4,13 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"os"
+	"path/filepath"
+	"sort"
+	"strings"
 
 	"github.com/charmbracelet/log"
 	"github.com/spf13/cobra"
@@ -42,15 +46,15 @@ type gameResponse struct {
 var deployCmd = &cobra.Command{
 	Use:   "deploy",
 	Short: "Deploy the current folder's game code to Odyc",
-	Long:  `Update the linked game's code with game.js from the current folder. The game must already exist (run 'odyc-cli create' first), and you must have authorized deploys for it (run 'odyc-cli login --game-id=...').`,
+	Long:  `Bundle the current folder's game code (utils/, scenes/ and index.js) into a single file and update the linked game with it. The game must already exist (run 'odyc-cli create' first), and you must be signed in (run 'odyc-cli login', which authorizes deploys for all your games).`,
 	Run: func(cmd *cobra.Command, args []string) {
-		code, err := os.ReadFile("game.js")
+		code, err := bundleGame(".")
 		if err != nil {
-			if os.IsNotExist(err) {
-				log.Warn("No game.js found in the current folder. Run 'odyc-cli create' first, or cd into your game folder")
+			if errors.Is(err, os.ErrNotExist) {
+				log.Warn("No game found in the current folder (expected index.js or game.js). Run 'odyc-cli create' first, or cd into your game folder")
 				return
 			}
-			log.Error("Failed to read game.js: " + err.Error())
+			log.Error("Failed to read game code: " + err.Error())
 			return
 		}
 
@@ -81,12 +85,12 @@ var deployCmd = &cobra.Command{
 		}
 
 		// Update the game's code.
-		_, game, err := callGameAPI(cfg, tokens, http.MethodPut, "/v1/games/"+conf.GameID+"/code", map[string]any{"code": string(code)})
+		_, game, err := callGameAPI(cfg, tokens, http.MethodPut, "/v1/games/"+conf.GameID+"/code", map[string]any{"code": code})
 		if err != nil {
 			var apiErr *apiError
 			if errors.As(err, &apiErr) && apiErr.status == http.StatusForbidden {
 				log.Warn(apiErr.message)
-				log.Infof("Authorize deploys for this game by signing in again: odyc-cli login --game-id=\"%s\"", conf.GameID)
+				log.Info("Authorize deploys by signing in again: odyc-cli login")
 				return
 			}
 			reportAPIError("Failed to deploy game code", err)
@@ -110,6 +114,79 @@ var deployCmd = &cobra.Command{
 		log.Logf(3, "Play your game at:")
 		log.Info(odycAPIBase + "/g/" + slug)
 	},
+}
+
+// bundleGame assembles the deployable, single-file game code from the project
+// rooted at dir. Files are concatenated in the same order index.html loads them
+// — every *.js in utils/, then every *.js in scenes/, then index.js last — so
+// the uploaded bundle behaves exactly like the game does when played locally.
+// Because all files share one scope, definitions in earlier files are available
+// to later ones, and the entry point in index.js runs after everything is
+// defined.
+//
+// For backwards compatibility with older single-file projects, a project with a
+// game.js and no index.js is deployed as-is.
+func bundleGame(dir string) (string, error) {
+	indexPath := filepath.Join(dir, "index.js")
+	if _, err := os.Stat(indexPath); err != nil {
+		if !os.IsNotExist(err) {
+			return "", err
+		}
+		// Legacy layout: a lone game.js.
+		data, err := os.ReadFile(filepath.Join(dir, "game.js"))
+		if err != nil {
+			if os.IsNotExist(err) {
+				return "", os.ErrNotExist
+			}
+			return "", err
+		}
+		return string(data), nil
+	}
+
+	var parts []string
+
+	appendDir := func(sub string) error {
+		entries, err := os.ReadDir(filepath.Join(dir, sub))
+		if err != nil {
+			if os.IsNotExist(err) {
+				return nil
+			}
+			return err
+		}
+
+		names := make([]string, 0, len(entries))
+		for _, e := range entries {
+			if !e.IsDir() && strings.HasSuffix(e.Name(), ".js") {
+				names = append(names, e.Name())
+			}
+		}
+		sort.Strings(names)
+
+		for _, name := range names {
+			rel := filepath.ToSlash(filepath.Join(sub, name))
+			data, err := os.ReadFile(filepath.Join(dir, sub, name))
+			if err != nil {
+				return err
+			}
+			parts = append(parts, fmt.Sprintf("// === %s ===\n%s", rel, string(data)))
+		}
+		return nil
+	}
+
+	if err := appendDir("utils"); err != nil {
+		return "", err
+	}
+	if err := appendDir("scenes"); err != nil {
+		return "", err
+	}
+
+	indexData, err := os.ReadFile(indexPath)
+	if err != nil {
+		return "", err
+	}
+	parts = append(parts, "// === index.js ===\n"+string(indexData))
+
+	return strings.Join(parts, "\n\n"), nil
 }
 
 // reportAPIError logs an API failure, mapping an expired/rejected session to a

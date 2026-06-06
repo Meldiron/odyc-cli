@@ -13,12 +13,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// loginGameID, when set via --game-id, narrows the requested code-write grant
-// to a single game so deploys to it can be authorized.
-var loginGameID string
-
 func init() {
-	loginCmd.Flags().StringVar(&loginGameID, "game-id", "", "authorize code deploys for a specific game ID")
 	rootCmd.AddCommand(loginCmd)
 }
 
@@ -37,7 +32,7 @@ type deviceAuthResponse struct {
 var loginCmd = &cobra.Command{
 	Use:   "login",
 	Short: "Sign in to Odyc using your browser",
-	Long:  `Sign in using the OAuth 2.1 device authorization flow. A code is shown which you confirm in your browser to authenticate this device.`,
+	Long:  `Sign in using the OAuth 2.1 device authorization flow. A code is shown which you confirm in your browser to authenticate this device. Signing in also authorizes code deploys for all of your games.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		cfg, err := fetchOIDCConfig()
 		if err != nil {
@@ -54,7 +49,7 @@ var loginCmd = &cobra.Command{
 			}
 		}
 
-		device, err := requestDeviceCode(cfg, loginGameID)
+		device, err := requestDeviceCode(cfg)
 		if err != nil {
 			log.Error("Failed to start sign-in: " + err.Error())
 			return
@@ -117,16 +112,14 @@ var loginCmd = &cobra.Command{
 }
 
 // requestDeviceCode kicks off the device authorization flow.
-func requestDeviceCode(cfg *OIDCConfig, gameID string) (*deviceAuthResponse, error) {
+func requestDeviceCode(cfg *OIDCConfig) (*deviceAuthResponse, error) {
 	form := url.Values{}
 	form.Set("client_id", oauthClientID)
 	form.Set("scope", oauthScope)
 
-	// Only request a Rich Authorization Request when a specific game is being
-	// authorized; a plain sign-in sends no authorization_details at all.
-	if gameID != "" {
-		form.Set("authorization_details", authorizationDetails(gameID))
-	}
+	// Always request the Rich Authorization Request so a single sign-in
+	// authorizes code deploys for all of the user's games.
+	form.Set("authorization_details", authorizationDetails())
 
 	resp, err := http.PostForm(cfg.DeviceAuthorizationEndpoint, form)
 	if err != nil {

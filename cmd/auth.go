@@ -50,22 +50,21 @@ const (
 )
 
 // authorizationDetails builds the RFC 9396 Rich Authorization Request (RAR) the
-// CLI asks for at sign-in: permission to write code to games. When gameID is
-// set, the grant is narrowed to that specific game — the Odyc code-update
-// endpoint authorizes per game by matching this detail's identifier (and type
-// and actions) against the access token.
-func authorizationDetails(gameID string) string {
+// CLI asks for at sign-in: permission to write code to any of the user's games.
+// The wildcard identifier "*" grants code.write across all games, so a single
+// sign-in authorizes every deploy — no need to name a specific game. The Odyc
+// code-update endpoint authorizes a deploy by matching this detail's type,
+// actions and (wildcard) identifier against the access token.
+func authorizationDetails() string {
 	detail := map[string]any{
-		"type":    "game",
-		"actions": []string{"code.write"},
-	}
-	if gameID != "" {
-		detail["identifier"] = gameID
+		"type":       "game",
+		"actions":    []string{"code.write"},
+		"identifier": "*",
 	}
 
 	data, err := json.Marshal([]map[string]any{detail})
 	if err != nil {
-		return `[{"type":"game","actions":["code.write"]}]`
+		return `[{"type":"game","actions":["code.write"],"identifier":"*"}]`
 	}
 	return string(data)
 }
