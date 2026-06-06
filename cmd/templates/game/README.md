@@ -39,9 +39,9 @@ odyc-cli deploy
 ```
 
 `deploy` bundles `utils/`, `scenes/` and `index.js` (in that order) into a
-single file and uploads it. Make sure you've authorized deploys for this game
-first:
+single file and uploads it. Make sure you're signed in first — a single sign-in
+authorizes deploys for all of your games:
 
 ```bash
-odyc-cli login --game-id="<your game id>"
+odyc-cli login
 ```

@@ -115,7 +115,7 @@ my-game/
 
 There is no build step: every `.js` file is loaded into one shared scope, so anything defined in one file is available in the others.
 
-After creating, you need to authorize deploys for the new game by signing in again with its ID (see `login --game-id`).
+As long as you're signed in (`odyc-cli login`), you can deploy the new game right away — sign-in authorizes deploys for all of your games.
 
 ```bash
 odyc-cli create [folder]
@@ -126,7 +126,6 @@ odyc-cli create [folder]
 odyc-cli create my-game
 cd my-game
 open index.html   # play locally
-odyc-cli login --game-id="<id printed by create>"
 # edit scenes/, utils/ and index.js
 odyc-cli deploy
 ```
@@ -138,7 +137,7 @@ odyc-cli deploy
 
 Bundle the current folder's game code into a single file and update the linked game with it. Files are concatenated in the same order `index.html` loads them — every `*.js` in `utils/`, then every `*.js` in `scenes/`, then `index.js` last — so the deployed bundle behaves exactly like the game does locally. (Legacy single-file projects with just a `game.js` are still deployed as-is.) The game must already exist (`odyc-cli create`) and be recorded in `odyc.json`; this command only updates code, it does not create games. When finished, the CLI prints the playable URL.
 
-Code updates are authorized per game via an OAuth 2.1 Rich Authorization Request (`type: game`, `actions: [code.write]`, `identifier: <gameId>`) granted at sign-in — run `odyc-cli login --game-id="<id>"` first. If the grant is missing, deploy returns a `403` and reminds you how to authorize.
+Code updates are authorized via an OAuth 2.1 Rich Authorization Request (`type: game`, `actions: [code.write]`, `identifier: *`) granted at sign-in — run `odyc-cli login` first. The wildcard identifier authorizes deploys for all of your games in a single sign-in. If the grant is missing, deploy returns a `403` and reminds you how to authorize.
 
 ```bash
 odyc-cli deploy
@@ -159,15 +158,13 @@ odyc-cli deploy
 
 Sign in to your Odyc account using the OAuth 2.1 device authorization flow. The CLI prints a verification URL and a code, then waits while you authorize. Press ENTER to open the URL in your browser, or open it yourself — polling starts immediately either way. Credentials are stored locally in your OS config directory (`auth.json`) with owner-only permissions.
 
-Pass `--game-id` to additionally authorize code deploys for a specific game. This narrows the requested Rich Authorization Request to `type: game`, `actions: [code.write]`, `identifier: <gameId>`, which the deploy endpoint requires.
+Signing in also authorizes code deploys for all of your games via a Rich Authorization Request (`type: game`, `actions: [code.write]`, `identifier: *`), so no per-game authorization step is needed.
 
 ```bash
 odyc-cli login
-odyc-cli login --game-id="<game id>"
 ```
 
 **Options:**
-- `--game-id <id>` - Authorize code deploys for a specific game ID
 - `-h, --help` - Show help for login command
 
 ### `whoami`
