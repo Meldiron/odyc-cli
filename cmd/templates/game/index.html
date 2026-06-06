@@ -16,17 +16,19 @@
 		<script>
 			Object.assign(window, odyc);
 		</script>
-
+	</head>
+	<body>
 		<!--
-			Your game, split across small files. Order matters: shared utils first,
-			then scenes, then the entry point last. When you add a new file, add a
-			matching <script> tag here — `odyc-cli deploy` bundles these same files
-			in this same order.
+			Your game, split across small files, loaded at the end of <body> so that
+			`document.body` exists by the time the game appends its canvas to it.
+			Order matters: shared utils first, then scenes, then the entry point
+			last. When you add a new file, add a matching <script> tag here at the
+			end of <body> — `odyc-cli deploy` bundles these same files in this same
+			order.
 		-->
 		<script src="utils/sprites.js"></script>
 		<script src="scenes/title.js"></script>
 		<script src="scenes/world.js"></script>
 		<script src="index.js"></script>
-	</head>
-	<body></body>
+	</body>
 </html>
